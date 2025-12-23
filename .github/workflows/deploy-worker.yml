@@ -58,3 +58,4 @@ jobs:
             --platform managed \
             --port 8080 \
             --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL }},REDIS_URL=${{ secrets.REDIS_URL }},ENVIRONMENT=prod,SECRET_KEY=${{ secrets.SECRET_KEY }},GCP_PROJECT_ID=$PROJECT_ID,PUBSUB_TOPIC=$PUBSUB_TOPIC
+
