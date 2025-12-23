@@ -23,15 +23,18 @@ from .db import Base, engine  # noqa: E402
 async def on_startup() -> None:
     """Application startup hook.
 
-    We try to auto-create DB tables for convenience in dev. In Cloud Run, a
-    transient or misconfigured DATABASE_URL should not prevent the container
-    from starting, so we log errors instead of crashing the process.
+    In the dev environment we auto-create DB tables for convenience. In
+    staging/prod (e.g. Cloud Run), we skip this so startup does not depend
+    on direct DB access or migrations.
     """
 
-    try:
-        Base.metadata.create_all(bind=engine)
-    except Exception as exc:  # noqa: BLE001
-        logger.error("Error creating database tables on startup: {}", exc)
+    if settings.environment.lower() == "dev":
+        try:
+            Base.metadata.create_all(bind=engine)
+        except Exception as exc:  # noqa: BLE001
+            logger.error("Error creating database tables on startup: {}", exc)
+    else:
+        logger.info("Skipping automatic DB schema creation (environment=%s)", settings.environment)
 
 
 @app.get("/healthz", tags=["health"])
