@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Todo Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <div class="card">
+        <h1>Todo Dashboard</h1>
+        <p>Logged in as {{ user.email }}</p>
+        <form method="post" action="/auth/logout">
+          <button type="submit" class="secondary">Logout</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Add a new todo</h2>
+        <form method="post" action="/todos">
+          <label>
+            <input type="text" name="title" placeholder="What do you need to do?" required />
+          </label>
+          <label>
+            <input type="text" name="description" placeholder="Optional description" />
+          </label>
+          <button type="submit">Add</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Your todos</h2>
+        <ul class="todo-list">
+          {% for todo in todos %}
+          <li>
+            <div class="todo-main">
+              <form method="post" action="/todos/{{ todo.id }}/toggle">
+                <button type="submit" class="secondary">{% if todo.is_done %}✔{% else %}○{% endif %}</button>
+              </form>
+              <div>
+                <div class="todo-title{% if todo.is_done %} done{% endif %}">{{ todo.title }}</div>
+                {% if todo.description %}
+                  <small>{{ todo.description }}</small>
+                {% endif %}
+              </div>
+            </div>
+            <div class="todo-actions">
+              <form method="post" action="/todos/{{ todo.id }}/delete">
+                <button type="submit" class="secondary">Delete</button>
+              </form>
+            </div>
+          </li>
+          {% else %}
+          <li>No todos yet. Add one above.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
