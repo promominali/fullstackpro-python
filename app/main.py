@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import HTMLResponse
+from loguru import logger
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -20,8 +21,17 @@ from .db import Base, engine  # noqa: E402
 
 @app.on_event("startup")
 async def on_startup() -> None:
-    # For simplicity we auto-create tables; in production consider Alembic migrations instead.
-    Base.metadata.create_all(bind=engine)
+    """Application startup hook.
+
+    We try to auto-create DB tables for convenience in dev. In Cloud Run, a
+    transient or misconfigured DATABASE_URL should not prevent the container
+    from starting, so we log errors instead of crashing the process.
+    """
+
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Error creating database tables on startup: {}", exc)
 
 
 @app.get("/healthz", tags=["health"])
